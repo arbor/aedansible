@@ -1,0 +1,4 @@
+---
+- name: Set URL hostname
+  aed_general_settings:
+    url_hostname: aed.example.com

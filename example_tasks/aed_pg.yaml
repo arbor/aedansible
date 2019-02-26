@@ -1,0 +1,7 @@
+- name: Set up a protection group
+  aed_pg:
+    pg_name: myProtectionGroup
+    pg_active: yes
+    pg_protected_hosts: 172.17.18.0/24
+    pg_server_type: Generic Server
+    pg_description: Try using Ansible to make this PG

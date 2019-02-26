@@ -1,0 +1,7 @@
+- name: Set remote syslog
+  aed_remote_syslog:
+    syslog_server: syslog-server.example.net
+    syslog_port: 68
+    syslog_protocol: udp
+    secure: No
+

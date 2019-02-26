@@ -1,0 +1,23 @@
+stages:
+  - lint
+  - test
+  - publish
+
+flake8:
+  stage: lint
+  image: python:3.6
+  script:
+    - pip install flake8==3.5.0
+    - flake8 $(find ./ -name "*.py") --ignore=E501,E402
+
+publish-github:
+  stage: publish
+  image: docker:17.07
+  only:
+    - tags
+  before_script:
+    - apk add --update git rsync bash
+    - git config --global user.email "${GITHUB_USER}@netscout.com"
+    - git config --global user.name "${GITHUB_USER}"
+  script:
+    - ./publish.sh

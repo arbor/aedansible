@@ -1,0 +1,12 @@
+- name: Set SNMP Settings
+  aed_snmp:
+    snmp_version: 2
+    snmp_community: public
+
+#   snmp_version: 3
+#   snmp_username: snmpUser
+#   snmp_security_level: authPriv
+#   snmp_password: snmpPassword
+#   snmp_auth_proto: sha
+#   snmp_privacy_password: snmpPrivacy
+#   snmp_privacy_protocol: aes

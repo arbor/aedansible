@@ -1,0 +1,14 @@
+---
+- name: Set License Server
+  aed_license:
+    server_id: 3QFFHCMBP3XR
+
+- name: Request throughput capability
+  aed_license:
+    capability: throughput
+    requested: 500
+
+- name: Request AIF advanced capability
+  aed_license:
+    capability: aif
+    requested: advanced

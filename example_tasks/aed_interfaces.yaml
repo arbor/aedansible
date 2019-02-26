@@ -1,0 +1,26 @@
+---
+- name: Setup link state propagation timeouts
+  aed_interfaces:
+    link_propagation_up_timeout: 2
+    link_propagation_down_timeout: 5
+
+- name: Setup int0
+  aed_interfaces:
+    name: int0
+    addr: 192.0.2.1/24
+
+- name: Setup ext0
+  aed_interfaces:
+    name: ext0
+    addr: 198.51.100.1/24
+
+- name: Setup ext1
+  aed_interfaces:
+    name: ext1
+    addr: 203.0.113.1/24
+
+- name: Remove ext0 address
+  aed_interfaces:
+    name: ext0
+    addr: 198.51.100.1/24
+    addr_present: no

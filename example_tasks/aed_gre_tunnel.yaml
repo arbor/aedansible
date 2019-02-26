@@ -1,0 +1,13 @@
+- name: create/update a GRE tunnel
+  aed_gre_tunnel:
+    # interface and state are required parameters
+    interface: "ext0"
+    state: "present"
+    remote_ips: ["1.1.1.1", "2.2.2.2"]
+    local_ip: "192.168.1.1"
+    subnet_length: 24
+
+- name: delete a GRE tunnel
+  aed_gre_tunnel:
+    interface: "ext0"
+    state: "absent"

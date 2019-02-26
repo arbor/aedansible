@@ -1,0 +1,4 @@
+---
+- hosts: aed-hosts # This should match the group name in your inventory file.
+  roles:
+    - aed

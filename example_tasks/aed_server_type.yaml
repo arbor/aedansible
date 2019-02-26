@@ -1,0 +1,77 @@
+- name: set some server-type type stuff
+  aed_server_type:
+    name: myServerType
+    base_server_type: Generic Server
+    present: Yes
+    stix_enabled: yes
+
+    protection_level_high:
+      syn_auth_enabled: yes
+      syn_auth_http_auth_enabled: no
+      syn_auth_http_auth_method: java
+
+    protection_level_low:
+      appbehavior_interrupt_count: 697071
+      botnet_basic: yes
+      botnet_segment: no
+      botnet_signatures: yes
+      connection_limit_enabled: yes
+      detect_icmp_enabled: yes
+      detect_icmp_bps: 123
+      detect_icmp_rate: 456
+      detect_syn_flood_enabled: no
+      detect_syn_flood_delta_rate: 543
+      detect_syn_flood_rate: 987
+      dns_auth_enable: yes
+      dns_malform_enable: no
+      dns_nx_domain_rate: 7654
+      dns_query_rate: 3567
+      dns_regex_list: domain1.com,.domain2.com,.domain3.*,.domain4.*,ohboy*
+      filter_list: pass port 22 and src 192.0.2.0/24,drop port 22
+      fragmentation_detection_enabled: yes
+      fragmentation_detection_bps: 50000
+      fragmentation_detection_pps: 100
+      http_malform_enabled: yes
+      http_proxy_detect_enabled: yes
+      http_rate_limit_object_rate: 5000
+      http_rate_limit_request_rate: 4000
+      http_regex_list: matchThis*,thenMatchThat*
+      idle_reset_enabled: no
+      idle_reset_bit_rate: 34567
+      idle_reset_idle_timeout: 5
+      idle_reset_init_size: 10
+      idle_reset_init_timeout: 45
+      idle_reset_num_idles: 15
+      idle_reset_track_long_lived: yes
+      multicast_enabled: yes
+      private_addresses_enabled: yes
+      rate_based_blocking_bps: 8888
+      rate_based_blocking_pps: 6251
+      regex_tcp_ports: 10,11,12,13
+      regex_udp_ports: 20,30,40,50
+      regex_pattern: matchThisStuff*,matchMoreStuff
+      regex_blacklist_enable: yes
+      regex_include_headers: yes
+      regex_enabled: yes
+      regex_match_source_port: yes
+      reputation_enabled: no
+      shaping_enabled: yes
+      shaping_bps: 50
+      shaping_filter: proto tcp,proto udp
+      shaping_pps: 1500
+      sip_malform_enabled: yes
+      sip_request_rate: 1234
+      syn_auth_enabled: yes
+      syn_auth_automation_enabled: yes
+      syn_auth_automation_threshold: 3000
+      syn_auth_http_auth_enabled: yes
+      syn_auth_http_auth_method: java
+      tls_malform_enabled: yes
+      udp_flood_enabled: yes
+      udp_flood_bps: 50
+      udp_flood_pps: 123
+      webcrawler_enabled: no
+
+    protection_level_medium:
+      rate_based_blocking_bps: 22222
+      rate_based_blocking_pps: 33333

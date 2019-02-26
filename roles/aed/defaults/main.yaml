@@ -1,0 +1,19 @@
+---
+# Use HTTP or HTTPS instead of SSH to connect to the AED device.
+ansible_connection: httpapi
+# Use the AED httpapi connection plugin.
+ansible_network_os: aed
+# Use HTTPS to connect to the AED device.
+ansible_httpapi_use_ssl: True
+# Disable certificate validation.
+ansible_httpapi_validate_certs: False
+# The following variables should not be enabled unless you know
+# what you are doing.
+# The proxy address for connecting to the AED device (currently broken).
+# ansible_httpapi_use_proxy: "127.0.0.1:8080"
+# The path to the AED login page.
+# ansible_httpapi_aed_login_path: "/platform/login"
+# The base URL path to the AED REST API.
+# ansible_httpapi_aed_api_path: "/api/aed"
+# The AED API version to use.
+# ansible_httpapi_aed_api_ver: 2

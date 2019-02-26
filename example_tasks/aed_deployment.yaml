@@ -1,0 +1,5 @@
+- name: Set deployment modes
+  aed_deployment:
+    deployment_mode: inline
+    protection_level: medium
+    protection_active: yes

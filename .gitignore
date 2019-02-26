@@ -1,0 +1,16 @@
+*.py[co]
+*.py,cover
+venv
+.idea*
+*~
+*DS_Store
+.idea*
+*.log
+.pytest
+.tags
+.tags_sorted_by_file
+.vscode
+*.retry
+hosts
+roles/aed/tasks/
+roles/aed/vars/

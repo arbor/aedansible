@@ -1,0 +1,8 @@
+---
+- name: configure SMTP server
+  aed_smtp:
+    # Can be an IP address or a hostname
+    server: 127.0.0.1
+    username: admin
+    password: admin
+
