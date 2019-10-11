@@ -50,7 +50,7 @@ create_tag() {
 
 copy_and_commit() {
     cd ${CI_PROJECT_DIR}
-    git checkout ${TAGGING_BRANCH}
+    git checkout ${CI_COMMIT_TAG}
     rsync -av ./ ${LOCAL_GITHUB_DIR}/${GITHUB_REPO}/ --exclude .git
     cd ${LOCAL_GITHUB_DIR}/${GITHUB_REPO}
     git add .

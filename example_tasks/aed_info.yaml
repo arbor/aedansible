@@ -1,0 +1,10 @@
+---
+- name: Get AED info
+  aed_facts:
+    gather_subset:
+      - device_info
+  register: result
+
+- set_fact:
+    aed_ver: "{{ result.ansible_facts.ansible_net_aed_packages.aed.version }}"
+

@@ -4,6 +4,7 @@
 # GNU General Public License v3.0+ (see COPYING or  https://www.gnu.org/licenses/gpl-3.0.txt) noqa
 
 
+import re
 from contextlib import contextmanager
 from ansible.module_utils.connection import ConnectionError
 
@@ -21,6 +22,9 @@ aed_provider_spec = {}  # If need to build default args
 """XXX: I don't think this is used anywhere"""
 aed_argument_spec = {}  # If need to build default args
 """TODO: Description of this attribute"""
+BUILD_RE = re.compile('build\s+([0-9A-Z]{4})')
+ARBOS_VERSION_RE = re.compile('ArbOS\s+(.*)\s+system')
+AED_VERSION_RE = re.compile('\s+(\d+\.\d+\.\d+)\s+')
 
 
 class AEDAPIError(Exception):

@@ -221,7 +221,7 @@ options:
                     - Blocks any traffic whose source is a designated private
                       address.
                 type: bool
-            rate_base_blocking_bps:
+            rate_based_blocking_bps:
                 description:
                     - Detects sources that exceed the configured thresholds,
                       and then places those sources on the temporary blocked
@@ -268,9 +268,24 @@ options:
                 description:
                     - Payload regular expression UDP ports to match.
                 type: list
+            reputation_categories:
+                description:
+                    - Dictionary mapping ASERT threat categories to
+                      {'confidence', 'enabled'} dicts.
+                type: dict
+            reputation_custom_confidence
+                description:
+                    - Custom default confidence index for ASERT threat
+                      categoies.
+                type: int
             reputation_enabled:
                 description:
                     - Enable Atlas Intelligence Feed's threat categories.
+                type: bool
+            reputation_use_custom:
+                description:
+                    - Enable custom default confidence index for ASERT threat
+                      categories.
                 type: bool
             shaping_enabled:
                 description:
@@ -333,8 +348,12 @@ options:
                 description:
                     - Set the HTTP authentication to use for spoofed SYN
                       protection when HTTP auth is enabled.
-                choices: ['java', 'redirect', 'soft_reset']
+                choices: ['javascript', 'redirect', 'soft_reset']
                 type: str
+            syn_auth_out_of_seq_enabled:
+                description:
+                    - Enable TCP Out of Sequence Authentication
+                type: bool
             tls_malform_enabled:
                 description:
                     - Blocks TLS requests that are not valid or do not complete
@@ -730,9 +749,8 @@ P_LEVEL_MAP = [
          ('regex_udp_ports', 'udpPorts', list)]),
     ('reputation',
         [('reputation_enabled', 'enabled', bool),
-         ('reputation_asert_confidence', 'asertConfidence', str),
          ('reputation_categories', 'categories', dict),
-         ('reputation_custom_confidence', 'customConfidence', str),
+         ('reputation_custom_confidence', 'customConfidence', int),
          ('reputation_use_custom', 'useCustom', bool)]),
     ('shaping',
         [('shaping_enabled', 'enabled', bool),
@@ -748,9 +766,9 @@ P_LEVEL_MAP = [
          ('syn_auth_automation_enabled', 'automationEnabled', bool),
          ('syn_auth_automation_threshold', 'automationThreshold', int),
          ('syn_auth_destination_ports', 'dstPorts', list),
+         ('syn_auth_out_of_seq_enabled', 'outOfSeqEnabled', bool),
          ('syn_auth_http_auth_enabled', 'httpAuthEnabled', bool),
          ('syn_auth_http_auth_method', 'javascriptEnabled', None),
-         ('syn_auth_http_auth_method', 'outOfSeqEnabled', None),
          ('syn_auth_http_auth_method', 'softResetEnabled', None)]),
     ('tlsMalform',
         [('tls_malform_enabled', 'enabled', bool)]),
@@ -765,11 +783,32 @@ P_LEVEL_MAP = [
          ('rate_based_blocking_pps', 'pps', int)])
 ]
 
-SYN_AUTH_MAP = {
-    'javascriptEnabled': 'java',
-    'outOfSeqEnabled': 'redirect',
-    'softResetEnabled': 'soft_reset'
-}
+
+def method_to_attrs(method):
+    method_map = {
+        'redirect': {
+            'javascriptEnabled': False,
+            'softResetEnabled': False,
+        },
+        'soft_reset': {
+            'javascriptEnabled': False,
+            'softResetEnabled': True,
+        },
+        'javascript': {
+            'javascriptEnabled': True,
+            'softResetEnabled': False,
+        }
+    }
+    return method_map[method]
+
+
+def attrs_to_method(settings):
+    if not settings.get('javascriptEnabled') and settings.get('softResetEnabled'):
+        return 'soft_reset'
+    elif settings.get('javascriptEnabled') and not settings.get('softResetEnabled'):
+        return 'javascript'
+    else:
+        return 'redirect'
 
 
 def pl_rest_to_ans(rest_dict, param_map):
@@ -782,17 +821,15 @@ def pl_rest_to_ans(rest_dict, param_map):
 
         for ans_key, rest_key, func in setting_param_map:
             val = setting_dict.get(rest_key)
-            if rest_key in SYN_AUTH_MAP:  # catch syn_auth
-                if val is True:
-                    val = SYN_AUTH_MAP[rest_key]
-                else:
-                    continue
-
-            elif val is not None:
+            if val is not None:
                 if func:
                     val = func(val)
 
             ans_dict[ans_key] = val
+
+        # Fix up syn_auth_http_auth_method key
+        if setting == 'synAuth' and setting_dict.get('httpAuthEnabled'):
+            ans_dict['syn_auth_http_auth_method'] = attrs_to_method(setting_dict)
 
     return ans_dict
 
@@ -805,11 +842,7 @@ def pl_ans_to_rest(ans_dict, param_map):
             val = ans_dict.get(ans_key, None)
             if ans_key == 'syn_auth_http_auth_method' and val is not None:
                 rest_dict.setdefault(setting, {})
-                syn_auth_key_dict = {key: False for key in SYN_AUTH_MAP}  # Load all to False
-                for rest_key, ans_key in SYN_AUTH_MAP.items():
-                    if val == ans_key:
-                        syn_auth_key_dict[rest_key] = True
-                rest_dict[setting].update(syn_auth_key_dict)
+                rest_dict[setting].update(method_to_attrs(val))
 
             elif val is not None:
                 if func:
@@ -966,10 +999,9 @@ def main():
         regex_tcp_ports=dict(type='list'),
         regex_udp_ports=dict(type='list'),
         reputation_enabled=dict(type='bool'),
-        # reputation_assert_confidence=dict(type='bool'),
-        # reputation_categories=dict(type='bool'),
-        # reputation_custom_confidence=dict(type='bool'),
-        # reputation_use_custom=dict(type='bool'),
+        reputation_categories=dict(type='dict'),
+        reputation_custom_confidence=dict(type='int'),
+        reputation_use_custom=dict(type='bool'),
         shaping_enabled=dict(type='bool'),
         shaping_bps=dict(type='int'),
         shaping_filter=dict(type='list'),
@@ -981,8 +1013,9 @@ def main():
         syn_auth_automation_threshold=dict(type='int'),
         syn_auth_destination_ports=dict(type='list'),
         syn_auth_http_auth_enabled=dict(type='bool'),
+        syn_auth_out_of_seq_enabled=dict(type='bool'),
         syn_auth_http_auth_method=dict(
-            choices=['java', 'redirect', 'soft_reset']
+            choices=['javascript', 'redirect', 'soft_reset']
         ),
         tls_malform_enabled=dict(type='bool'),
         udp_flood_enabled=dict(type='bool'),
@@ -996,6 +1029,7 @@ def main():
         present=dict(type='bool', default=True),
         base_server_type=dict(type='str', required=True),
         stix_enabled=dict(type='bool'),
+        http_reporting=dict(type='bool'),
         protection_level_high=dict(type='dict', options=p_level_arg_spec),
         protection_level_low=dict(type='dict', options=p_level_arg_spec),
         protection_level_medium=dict(type='dict', options=p_level_arg_spec)

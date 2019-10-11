@@ -4,11 +4,12 @@
     base_server_type: Generic Server
     present: Yes
     stix_enabled: yes
+    http_reporting: true
 
     protection_level_high:
       syn_auth_enabled: yes
       syn_auth_http_auth_enabled: no
-      syn_auth_http_auth_method: java
+      syn_auth_http_auth_method: javascript
 
     protection_level_low:
       appbehavior_interrupt_count: 697071
@@ -54,7 +55,13 @@
       regex_include_headers: yes
       regex_enabled: yes
       regex_match_source_port: yes
-      reputation_enabled: no
+      reputation_categories:
+        "Campaigns and Targeted Attacks": { confidence: 35, enabled: true }
+        "Email Threats": { confidence: 50, enabled: true }
+        "Location Based Threats": { confidence: null, enabled: false }
+      reputation_custom_confidence: 75
+      reputation_enabled: yes
+      reputation_use_custom: true
       shaping_enabled: yes
       shaping_bps: 50
       shaping_filter: proto tcp,proto udp
@@ -65,7 +72,8 @@
       syn_auth_automation_enabled: yes
       syn_auth_automation_threshold: 3000
       syn_auth_http_auth_enabled: yes
-      syn_auth_http_auth_method: java
+      syn_auth_http_auth_method: javascript
+      syn_auth_out_of_seq_enabled: false
       tls_malform_enabled: yes
       udp_flood_enabled: yes
       udp_flood_bps: 50

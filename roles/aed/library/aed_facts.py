@@ -21,6 +21,7 @@ options:
       - Restricts the facts that are collected to a given subset.
         Use C(M(!)) before a subset name if you do not want to collect facts for that subset.
     choices: [
+      'device_info'
       'general_settings',
       'operational_status',
       'protection_groups',
@@ -32,7 +33,7 @@ options:
       'all'
     ]
     required: false
-    default: '!info'
+    default: 'all'
     version_added: "2.7"
     type: str
 """
@@ -62,24 +63,12 @@ aed_gather_subset:
   type: list
 
 # aed_info
-aed_model:
-  description: Returns the model name for an AED device.
+aed_hardware:
+  description: Returns the hardware information for the AED device.
   returned: always
   type: str
-aed_serialnum:
-  description: Returns the serial number for an AED device.
-  returned: always
-  type: str
-aed_version:
-  description: Returns the operating system version for an AED device.
-  returned: always
-  type: str
-aed_hostname:
-  description: Returns the hostname for an AED device.
-  returned: always
-  type: str
-aed_image:
-  description: Returns the name of the image file that an AED device is running.
+aed_packages:
+  description: Returns information on the ArbOS and AED packages installed on the  AED device.
   returned: always
   type: str
 
@@ -124,7 +113,10 @@ from ansible.module_utils.network.aed.aed import (AEDAPIBase,
                                                   AEDAPIError,
                                                   check_args,
                                                   rest_to_ans,
-                                                  exception_context)
+                                                  exception_context,
+                                                  ARBOS_VERSION_RE,
+                                                  BUILD_RE,
+                                                  AED_VERSION_RE)
 
 
 class FactsBase(object):
@@ -172,14 +164,26 @@ class FactsBase(object):
         return st_dict
 
 
-class Default(FactsBase):
+class DeviceInfo(FactsBase):
     def populate(self):
-
-        self.facts['aed_model'] = 'AED MODEL GOES HERE'
-        self.facts['aed_serialnum'] = 'AED SERIAL NUMBER GOES HERE'
-        self.facts['aed_version'] = 'AED SERIAL NUMBER GOES HERE'
-        self.facts['aed_hostname'] = 'AED HOSTNAME GOES HERE'
-        self.facts['aed_image'] = 'AED IMAGE NAME GOES HERE'
+        hardware_cfg = self.get_config('system/hardware')
+        packages_cfg = self.get_config('system/packages')
+        packages_ret = {'arbos': {}, 'aed': {}}
+        for _key, _val in packages_cfg.items():
+            if 'ARBOS' in _key.upper():
+                packages_ret['arbos']['arch'] = _val['arch']
+                packages_ret['arbos']['version'] = ARBOS_VERSION_RE.search(
+                    _val['comment']).group(1)
+                packages_ret['arbos']['build'] = BUILD_RE.search(
+                    _val['comment']).group(1)
+            elif 'ARBOR-EDGE-DEFENSE' in _key.upper():
+                packages_ret['aed']['arch'] = _val['arch']
+                packages_ret['aed']['version'] = AED_VERSION_RE.search(
+                    _val['comment']).group(1)
+                packages_ret['aed']['build'] = BUILD_RE.search(
+                    _val['comment']).group(1)
+        self.facts['aed_hardware'] = hardware_cfg
+        self.facts['aed_packages'] = packages_ret
 
 
 class OperationalStatus(FactsBase):
@@ -501,7 +505,7 @@ class Interfaces(FactsBase):
 
 
 FACT_SUBSETS = dict(
-    # default=Default, # API isn't available yet
+    device_info=DeviceInfo,
     operational_status=OperationalStatus,
     protection_groups=ProtectionGroups,
     server_types=ServerTypes,

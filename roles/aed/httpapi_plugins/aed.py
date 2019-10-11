@@ -54,6 +54,7 @@ AED_API_AUTH_COOKIE_NAME = "auth_tkt"
 HTTP_TEMP_REDIRECT = 302
 """Constant for HTTP code '302 Found'"""
 
+from distutils.version import LooseVersion
 import json
 
 from ansible.module_utils.connection import ConnectionError
@@ -63,6 +64,7 @@ from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.errors import AnsibleConnectionFailure
 from ansible.module_utils.six.moves.urllib.parse import urlencode
 from ansible.module_utils._text import to_text
+from ansible.release import __version__ as ANSIBLE_VERSION
 
 
 try:
@@ -239,15 +241,24 @@ class HttpApi(HttpApiBase):
         """Handle HTTP errors raised in
         ``ansible.plugins.connection.httpapi.Connection.send()``.
 
-        Overriding this to return None so we can handle errors at a higher
+        Overriding this to return False so we can handle errors at a higher
         layer.
 
         Returns:
-            None: None to force ``send()`` to re-throw the HTTPError exception.
+            bool: False to indicate that ``httpapi.Connection.send()`` should
+                rethrow the HTTPError exception. (For versions of Ansible prior
+                to 2.8, this method returns None to achieve the same effect.)
         """
+        # XXX: The required API for handle_httperror has changed between 2.7
+        # and 2.8. In 2.7, handle_httperror() must return a value other than
+        # True or False to force httpapi.Connection.send() to re-raise the
+        # exception. In 2.8, handle_httperror() must return False to force
+        # httpapi.Connection.send(). Therefore, we have no choice but to detect
+        # the version of Ansible in use before we decide on a return value.
+        if LooseVersion(ANSIBLE_VERSION) < LooseVersion('2.8'):
+            return None
         # TODO Catch unauthorized stuff??
-        # None means that the exception will be passed further to the caller
-        return None
+        return False
 
     def construct_url_path(self, path, path_params=None, query_params=None):
         """Build an absolute URL path.

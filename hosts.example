@@ -1,6 +1,6 @@
-# The example playbook.yaml file uses the group name aed-hosts, but you can use
+# The example playbook.yaml file uses the group name aed_hosts, but you can use
 # any group name you wish
-[aed-hosts]
+[aed_hosts]
 # This is an example of using API token auth
 aed-1.example.net ansible_httpapi_aed_api_token=ENhMwuvRjAgddHmvKPwpZJ07BiJzoANUlvv_3keA
 # This is an example of using username/password auth
